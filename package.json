@@ -10,17 +10,16 @@
   "author": "Gregor MacLennan",
   "license": "MIT",
   "dependencies": {
-    "@mapbox/geojson-rewind": "^0.5.1",
-    "@mapbox/geojsonhint": "^2.0.1",
-    "airtable": "^0.11.1",
-    "debug": "^2.6.3",
-    "dotenv": "^4.0.0",
+    "@mapbox/geojson-rewind": "^0.5.2",
+    "@mapbox/geojsonhint": "^3.3.0",
+    "airtable": "^0.11.6",
+    "debug": "^4.4.0",
+    "dotenv": "^10.0.0",
     "hubfs.js": "^1.0.0",
-    "json-stable-stringify": "^1.0.1",
+    "json-stable-stringify": "^1.2.1",
     "lodash": "^4.17.21",
-    "run-parallel": "^1.1.6"
+    "run-parallel": "^1.2.0"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/digidem/airtable-github-export.git"

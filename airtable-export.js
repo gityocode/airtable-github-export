@@ -17,7 +17,23 @@ var config = {
   airtableToken: process.env.AIRTABLE_API_KEY,
   base: process.env.AIRTABLE_BASE_ID,
   branches: process.env.GITHUB_BRANCH ? process.env.GITHUB_BRANCH.split(',') : ['master'],
-  filename: process.env.GITHUB_FILENAME || 'data.json'
+  filename: process.env.GITHUB_FILENAME || 'data.json',
+  // Add this new property:
+  viewId: process.env.VIEW_ID || null,
+  // Optional: For table-specific views
+  viewIds: process.env.VIEW_IDS ? parseViewIds(process.env.VIEW_IDS) : {}
+}
+
+// Add this function to parse table-specific view IDs
+function parseViewIds(viewIdsString) {
+  const result = {};
+  viewIdsString.split(',').forEach(pair => {
+    const [table, view] = pair.split(':');
+    if (table && view) {
+      result[table] = view;
+    }
+  });
+  return result;
 }
 
 var CREATE_MESSAGE = '[AIRTABLE-GITHUB-EXPORT] create ' + config.filename
@@ -45,7 +61,17 @@ var tasks = config.tables.map(function (tableName) {
     // results in unhelpful diffs in Github
     output[tableName] = null
 
-    base(tableName).select().eachPage(page, done)
+    // Update this line to include view parameter
+    const selectOptions = {};
+    
+    // Check for table-specific view first, fall back to global view ID
+    if (config.viewIds[tableName]) {
+      selectOptions.view = config.viewIds[tableName];
+    } else if (config.viewId) {
+      selectOptions.view = config.viewId;
+    }
+    
+    base(tableName).select(selectOptions).eachPage(page, done)
 
     function page (records, next) {
       // This function will get called for each page of records.
@@ -156,7 +182,7 @@ function parseGeometry (geom) {
 // Check whether coordinates are valid
 function parseCoords (coords) {
   if (typeof coords[0] !== 'number' || typeof coords[1] !== 'number') return null
-  if (coords[0] < -180 || coords[0] > 180 || coords[1] < -90 || coords[1] > 90) return null
+  if (coords[0] < -180 || coords[0] > 180 || coords[1] < -90) return null
   return coords
 }
 
@@ -174,7 +200,7 @@ function isUrl(value) {
  * timestamp to the URLs returned from the API which changes every time */
 function customComparison (objValue, othValue) {
   // if neither is a URL, return undefined to use default comparison
-  if ((!isUrl(objValue) && isUrl(othValue))) return
+  if (!(isUrl(objValue) && isUrl(othValue))) return
   const objUrl = new URL(objValue)
   const othUrl = new URL(othValue)
   objUrl.search = ''
